@@ -215,10 +215,6 @@ launcher fails fast if it is unset.
 
 ## Known gaps
 
-- **Gemma-3-27B-it teacher SFT data** is not shipped as a
-  `Teacher=Gemma-3-27B-it_*.jsonl` SFT file — only its MIA candidate responses
-  (`data/MIADatasets/gemma-3-27b-it__*.jsonl`, `data/wild/gemma-3-27b-it__*`).
-  To train a Gemma-teacher student you must (re)generate that SFT set.
 - **Wild-model + closed-API generation** (R1, Claude, o1/o3, QwQ) used external
   services (OpenRouter / vendor APIs) and is not scripted here; their responses
   ship pre-generated in `data/wild/` (redistribution subject to vendor TOS).
