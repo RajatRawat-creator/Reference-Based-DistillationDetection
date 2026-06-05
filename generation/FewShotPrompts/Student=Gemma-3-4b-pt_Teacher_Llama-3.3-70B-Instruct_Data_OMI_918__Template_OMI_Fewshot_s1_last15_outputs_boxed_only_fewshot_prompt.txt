@@ -1,0 +1,69 @@
+Answer the last question in the same style as the examples below.
+
+Question:
+2.  The potential due to the line charge could be written as
+
+$$
+V(r)=f(r)+K,
+$$
+
+where $K$ is a constant. Determine $f(r)$.
+
+Answer:
+2.  The potential due to the line charge could be written as
+
+$$
+V(r)=f(r)+K,
+$$
+
+where $K$ is a constant. Determine $f(r)$.
+
+I am looking for $f(r)$ in the picture above. We can calculate $V$ anywhere along the line, so if we put the $r=0$ in for $r$ in the equation above, we get
+
+$$
+V(0)=f(0)+K=K
+$$
+
+and $V(100)=f(100)+K=K$.
+
+Thus, $f(100)-f(0)=K-K=0$, so the function $f(r)$ must be constant.  And because the potential is a constant, we know that $f(r)=0$ and $K=0$.
+
+So $V(r) = 0$.
+
+So, $\boxed{V(r) = 0}
+
+Question:
+The workers in a factory produce widgets and whoosits. For each product, production time is constant and identical for all workers, but not necessarily equal for the two products. In one hour, 100 workers can produce 300 widgets and 200 whoosits. In two hours, 60 workers can produce 240 widgets and 300 whoosits. In three hours, 50 workers can produce 150 widgets and $m$ whoosits. Find $m$.
+
+Answer:
+0 widgets and $m$ whoosits. Find $m$.
+
+This means that $300 / 100 = 240/60 = 150/50 = w/h$, so we have that $w = 240h, 200h, 150h$ respectively, or
+$w = 240h = 240 \times 5/6 h = 200h$,
+$200h = 200h$
+and
+$150h = 150h$.
+Thus, $m = 150h$.
+
+To determine the value of $m$, multiply both sides of the equation $w/h = 240h/h$ by $h$ to get $w = 240h$, and then multiply both sides of the equation $w/h = 150h/h$ by $h$ to get $w = 150h$. Thus, $240h = 150h$. Now that you have an equation, solve for $h$: 
+\[ 240h = 150h \Longrightarrow 90h = 0 \Longrightarrow h = 0 \]
+
+The answer is $\boxed{0}
+
+Question:
+A pyramid has a triangular base with side lengths $20$ , $20$ , and $24$ . The three edges of the pyramid from the three corners of the base to the fourth vertex of the pyramid all have length $25$ . The volume of the pyramid is $m\sqrt{n}$ , where $m$ and $n$ are positive integers, and $n$ is not divisible by the square of any prime. Find $m+n$ .
+
+Answer:
+24$ . The three edges of the pyramid from the three corners of the base to the fourth vertex of the pyramid all have length $25$ . The volume of the pyramid is $m\sqrt{n}$ , where $m$ and $n$ are positive integers, and $n$ is not divisible by the square of any prime. Find $m+n$ .
+
+My approach was to draw out the diagram and split the pyramid into two congruent right-angled triangular prisms joined together with a triangle on the base.
+
+In each triangular prism, the volume is the base area multiplied by the height.
+The base area of each triangular prism is $120$, because $\frac{1}{2}bh=\frac{1}{2}20\times24=120$. The height of the triangular prism is $25$, because the hypotenuse of each prism is $25$.
+
+The total volume is $120\times25+120\times25 = 6000$. Therefore $m = 6000$, and $n = 1$. $m + n = \boxed{6001}
+
+Question:
+<TARGET QUESTION HERE>
+
+Answer:

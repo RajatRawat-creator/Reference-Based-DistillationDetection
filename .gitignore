@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+.env
+
+# Outputs
+outputs/
+logs/
+checkpoints/
+*.png
+*.pdf
+*.log
+
+# Data is tracked in git in this release — no exclusions under data/
+
+# IDE
+.idea/
+.vscode/

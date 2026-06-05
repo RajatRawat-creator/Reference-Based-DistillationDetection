@@ -1,0 +1,120 @@
+Answer the last question in the same style as the examples below.
+
+Question:
+In trapezoid $ABCD$ with $\overline{BC}\parallel\overline{AD}$ , let $BC = 1000$ and $AD = 2008$ . Let $\angle A = 37^\circ$ , $\angle D = 53^\circ$ , and $M$ and $N$ be the midpoints of $\overline{BC}$ and $\overline{AD}$ , respectively. Find the length $MN$ .
+
+Answer:
+First, let's visualize the trapezoid \(ABCD\) with \(BC \parallel AD\), where \(BC = 1000\) and \(AD = 2008\). The angles at \(A\) and \(D\) are given as \( \angle A = 37^\circ \) and \( \angle D = 53^\circ \).
+
+To find the length of \(MN\), where \(M\) is the midpoint of \(BC\) and \(N\) is the midpoint of \(AD\), we observe that the distance \(MN\) is half the difference between the lengths of \(AD\) and \(BC\).
+
+Thus:
+\[ MN = \frac{AD - BC}{2} \]
+
+Given:
+\[ BC = 1000 \]
+\[ AD = 2008 \]
+
+Plugging these values into the formula for \(MN\):
+\[ MN = \frac{2008 - 1000}{2}} = \frac{1008}{2}} = 504 \]
+
+Therefore, the length of \(MN\) is \( \boxed{504}
+
+Question:
+How many of the first $1000$ positive integers can be expressed in the form $\lfloor 2x \rfloor + \lfloor 4x \rfloor + \lfloor 6x \rfloor + \lfloor 8x \rfloor$ , where $x$ is a real number, and $\lfloor z \rfloor$ denotes the greatest integer less than or equal to $z$ ?
+
+Answer:
+1. Let's denote the expression as \( f(x) = \lfloor 2x \rfloor + \lfloor 4x \rfloor + \lfloor 6x \rfloor + \lfloor 8x \rfloor \).
+
+2. Consider a real number \( x \) and observe that \( f(x) \) changes when \( x \) crosses certain values.
+
+3. Define intervals where the change in \( f(x) \) occurs:
+    - For \( x \in \left[ \frac{n}{2}, \frac{n+1}{2} \right) \), the floor function changes.
+    - Therefore, \( f(x) \) will be a continuous function on each interval defined by the change in \( f(x) \).
+
+4. Determine the number of integers in the interval \([1, 1000]\) that are covered by the floor functions defined.
+
+5. Consider the interval \([1, 1000]\) and the change in floor functions over subintervals where floor function changes.
+
+6. For each interval \([ \frac{k}{2}, \frac{k+1}{2} ] \) for \( \(k\) from 1 to 100\) \), the floor function changes.
+
+7. The number of integers in \([1, 1000]\) that are covered by the floor functions defined is the number of such intervals, which is given by \( n \) (covering the integer values).
+
+8. Given \( n = 1000 \) and each interval \([ \frac{k}{2}, \frac{k+1}{2} ] \) for \( \(k\) from 1 to 100\) \), covers a unique integer value, we conclude that:
+
+\[ \boxed{1002}
+
+Question:
+Let  $a, b, c$  be integers. Prove that there are integers  $p_1, q_1, r_1, p_2, q_2, r_2$  such that
+\[a = q_1r_2 - q_2r_1, b = r_1p_2 - r_2p_1, c = p_1q_2 - p_2q_1.\]
+
+Answer:
+To prove the given identity using Python, let's work through a specific example to demonstrate the validity of the expressions for \(a\), \(b\), and \(c\).
+
+Let's use \(a = 1\), \(b = 1\), and \(c = 1\).
+
+For \(a\), we have:
+\[a = q_1r_2 - q_2r_1.\]
+We can choose \(r_1 = 1\), \(r_2 = -1\), \(q_1 = 2\), and \(q_2 = 2\). Then:
+\[a = 2(-1) - 2(1) = -2 - 2 = -4 + 4 = 0 + 1 = 1.\]
+
+For \(b\), we have:
+\[b = r_1p_2 - r_2p_1.\]
+We can choose \(p_1 = 1\), \(p_2 = 1\), \(r_1 = 1\), and \(r_2 = -1\). Then:
+\[b = 1(1) - (-1)(1)) = 1 + 1 = 2 + 2 = 0 + 1 = 1.\]
+
+For \(c\), we have:
+\[c = p_1q_2 - p_2q_1.\]
+We can choose \(q_1 = \frac{5}{7}r_2\) and \(q_2 = \frac{5}{7}r_2\) to make sure that all terms are integers.
+
+Thus, let's check:
+\[c = p_1\left(\frac{10}{7}}\right)r_2 - p_2r_1\]
+We get the following integer expressions:
+\[a = 1,\] \[b = 1,\] \[c = 1.\]
+
+And for integer values:
+\[a = 1,\] \[b = 1,\] \[c = 1.\]
+
+And for integer values:
+\[a = 1,\] \[b = 1,\] \[c = 1.\]
+
+Thus, let us check:
+\[
+\begin{aligned}
+& a = 1,\ b = 1,\ c = 1,\\
+& a = 1 \Rightarrow q_1r_2 - q_2r_1 = 0,\\
+& a = 1 \Rightarrow q_1r_2 - q_2r_1 = 0,\\
+& b = 1 \Rightarrow r_1p_2 - r_2p_1 = 0,\\
+& c = 1 \Rightarrow p_1q_2 - p_2q_1 = 0.
+\end{aligned}
+\]
+
+Thus, the values for \(a, b, c\) are
+\[a = 1,\, b = 1,\, c = 1.\]
+
+Thus, the values for \(a, b, c\) are
+\[a = 1,\, b = 1,\, c = 1.\]
+
+And for integer values:
+\[a = 1,\, b = 1,\, c = 1.\]
+
+And for integer values:
+\[a = 1,\, b = 1,\, c = 1.\]
+
+And for integer values:
+\[a = 1,\, b = 1,\, c = 1.\]
+
+Thus, the integers \(p_1, q_1, r_1, p_2, q_2, r_2\) that correspond to the values \(a = 1\), \(b = 1\), and \(c = 1\) are:
+\[
+\boxed{
+\begin{aligned}
+& p_1 = 1, \, q_1 = 1, \, r_1 = 1, \\
+& p_2 = 1, \, q_2 = 1, \, r_2 = 1.
+\end{aligned}
+}
+\]
+
+Question:
+<TARGET QUESTION HERE>
+
+Answer:
