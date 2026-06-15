@@ -20,39 +20,20 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
  
 
+# Controlled candidate pool: 4-way classification (Chat template), OMI + s1.
+# Labels match the shipped result JSONs in ReferenceMIAResults/controlled/.
 FILES_MAP = {
-    "Gemma-3-27B-it (OMI, Response Only)": "gemma-3-27b-it__openmath_jsonl__chat__vllm.jsonl",
-    "Gemma-3-27B-it (s1, Response Only)": "gemma-3-27b-it__s1k__chat__vllm.jsonl",
+    "Gemma-3-27B-it (OMI, Chat)": "gemma-3-27b-it__openmath_jsonl__chat__vllm.jsonl",
+    "Gemma-3-27B-it (s1, Chat)": "gemma-3-27b-it__s1k__chat__vllm.jsonl",
 
-    "GPT-OSS-120B (OMI)": "gpt-oss-120b__openmath_jsonl__chat__vllmCLEAN.jsonl",
-    "GPT-OSS-120B (s1)": "gpt-oss-120b__s1k__chat__vllmCLEAN.jsonl",
+    "GPT-OSS-120B (OMI, Chat)": "gpt-oss-120b__openmath_jsonl__chat__vllmCLEAN.jsonl",
+    "GPT-OSS-120B (s1, Chat)": "gpt-oss-120b__s1k__chat__vllmCLEAN.jsonl",
 
-    "Qwen-3-8B (OMI)": "Qwen3-8B__openmath_jsonl__chat__vllm_cleaned.jsonl",
-    "Qwen-3-8B (s1)": "Qwen3-8B__s1k__chat__vllm_cleaned.jsonl",
+    "Qwen-3-8B (OMI, Chat)": "Qwen3-8B__openmath_jsonl__chat__vllm_cleaned.jsonl",
+    "Qwen-3-8B (s1, Chat)": "Qwen3-8B__s1k__chat__vllm_cleaned.jsonl",
 
-    #"Claude-3.5-Sonnet (OMI, Response Only)": "Claude-Sonnet-3.5_omi(200).jsonl",
-    #"Claude-3.5-Sonnet (s1, Response Only)": "Claude-Sonnet-3.5_s1(200).jsonl", 
-
-    #"Claude Opus 4.5 (OMI, Trace + Response)": "claude-opus-4-5-20251101__openmath_jsonl__chat__claude_reasoning_only__REPAIRED.jsonl",
-    #"Claude Opus 4.5 (s1, Trace + Response)": "claude-opus-4-5-20251101__s1k__chat__claude_reasoning_only__REPAIRED.jsonl",
-
-    #"Claude Opus 4.6 (OMI, Trace + Response)": "Claude-Opus-4.6_omi(200)_reasoningonly.jsonl",
-    #"Claude Opus 4.6 (s1, Trace + Response)": "Claude-Opus-4.6_s1(200)_reasoningonly.jsonl",
-
-    #"o1 (OMI, Response Only)": "o1_omi(200).jsonl",
-    #"o1 (s1, Response Only)": "o1_s1(200).jsonl",
-
-    #"o3 (OMI, Response Only)": "o3_omi(200).jsonl",
-    #"o3 (s1, Response Only)": "o3_s1(200).jsonl",
-
-    "Llama-3.3-70B-Instruct (OMI, Response)": "Llama-3.3-70B-Instruct-FP8__openmath_jsonl__chat__vllm.jsonl",
-    "Llama-3.3-70B-Instruct (s1, Response)": "Llama-3.3-70B-Instruct-FP8__s1k__chat__vllm.jsonl",
-
-    #"QwQ-32B (OMI, Trace + Response)": "QwQ-32B-omi(200).jsonl",
-    #"QwQ-32B (s1, Trace + Response)": "QwQ-32B-s1(200).jsonl",
-
-    #"QwQ-32B Preview (OMI, Trace + Response)": "QwQ-32B-Preview-omi(200).jsonl",
-    #"QwQ-32B Preview (s1, Trace + Response)": "QwQ-32B-Preview-s1(200).jsonl",
+    "Llama-3.3-70B-Instruct (OMI, Chat)": "Llama-3.3-70B-Instruct-FP8__openmath_jsonl__chat__vllm.jsonl",
+    "Llama-3.3-70B-Instruct (s1, Chat)": "Llama-3.3-70B-Instruct-FP8__s1k__chat__vllm.jsonl",
 }
  
 

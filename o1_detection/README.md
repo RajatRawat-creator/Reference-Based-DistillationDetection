@@ -1,10 +1,12 @@
 # o1 ASCII vs Unicode reference MIA
 
 Detects o1-distillation by exploiting that OpenAI's o1 chat API returns
-non-ASCII codepoints encoded as `\uXXXX` escape sequences in the
-`default` (string) representation, whereas raw UTF-8 (`unicode`) preserves
-them. A model distilled from o1 will score the `\uXXXX`-escaped variant
-better than the raw-UTF-8 variant; a non-distilled model won't.
+non-ASCII codepoints as `\uXXXX` escape sequences. We compare two serializations
+of the same outputs: **ASCII** (each non-ASCII codepoint left as its literal
+`\uXXXX` escape; file `o1__responses_ascii.jsonl`) vs **Unicode** (raw UTF-8;
+`o1_openmath__responses_unicode.jsonl`). A model distilled from o1 scores the
+ASCII (`\uXXXX`-escaped) variant better than the raw-UTF-8 variant; a
+non-distilled model won't.
 
 ## Scripts
 
@@ -17,7 +19,7 @@ Per-file `transform` in `FILES_MAP`:
 - `None`     — leave the parsed text as-is (e.g. `o1_..._unicode.jsonl`)
 - `"escape"` — re-escape every non-ASCII codepoint back to its literal
               `\uXXXX` form. Without this, `json.loads` collapses
-              `*_default.jsonl` (which stored characters as `\uXXXX`)
+              `*_ascii.jsonl` (which stored characters as `\uXXXX`)
               and `*_unicode.jsonl` (raw UTF-8) to the *same* Python
               string, and the MIA scores come out identical.
 

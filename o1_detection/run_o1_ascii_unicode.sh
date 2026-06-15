@@ -1,8 +1,9 @@
 #!/bin/bash
-##SBATCH -p gpu  # Optional: set your cluster partition
+##SBATCH -p gpu                   # EDIT: your cluster partition
+##SBATCH --nodelist=NODE          # EDIT (optional): a specific node
 #SBATCH --job-name=refMIA_O1_R1Distill_s11
 #SBATCH --qos=preemptive
-#SBATCH --gpus=1
+#SBATCH --gpus=2
 #SBATCH --cpus-per-task=4
 #SBATCH --time=96:00:00
 #SBATCH --output=logs/%x_%j.out
@@ -11,18 +12,23 @@
 set -uo pipefail
 mkdir -p logs
 
-source ~/.bashrc 2>/dev/null || true
-if [[ -n "${CONDA_ENV:-}" ]]; then
-  conda activate "$CONDA_ENV"
-fi
+# Interpreter: defaults to `python`. For the GPT-OSS pairs pass
+# PYTHON=/path/to/your/gptoss-env/bin/python.
+PYTHON=${PYTHON:-python}   # EDIT: set to your env's python if not on PATH
 export PYTHONNOUSERSITE=1
+
+# Which subset of the MODELS array to run:
+#   all      - every pair (needs an env that can load gpt-oss, i.e. gptoss_mia)
+#   nogptoss - the 16 non-gpt-oss pairs (run in sft)        [DEFAULT]
+#   gptoss   - only the 3 gpt-oss pairs (run in gptoss_mia, dtype auto)
+RUN_GROUP=${RUN_GROUP:-nogptoss}
 
 echo "=== GPU Sanity Check ==="
 echo "HOSTNAME=$(hostname)"
 echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-not set}"
-which python
+echo "PYTHON=$PYTHON"
 nvidia-smi --query-gpu=index,name,memory.total --format=csv
-python - <<'PY'
+"$PYTHON" - <<'PY'
 import sys, torch
 print("python:", sys.executable)
 print("torch:", torch.__version__)
@@ -35,17 +41,21 @@ print("cuda tensor ok:", x.device)
 PY
 echo "========================"
 
-cd "$(dirname "$0")"
+# Under sbatch, $0 is a copy in SLURM's spool dir, so `dirname $0` is wrong.
+# cd to the real script location (absolute) so ./run_o1_ascii_unicode.py and
+# ../outputs resolve correctly.
+cd "$(dirname "$0")"   # EDIT for sbatch: cd /abs/path/to/DistillDetectRelease/o1_detection
 
 export TOKENIZERS_PARALLELISM=false
 export PYTORCH_ALLOC_CONF=expandable_segments:True
 export TRANSFORMERS_NUM_WORKERS_MATERIALIZE=1
+export HF_TOKEN="${HF_TOKEN:-hf_PASTE_YOUR_TOKEN_HERE}"
 if [[ -z "${HF_TOKEN:-}" ]]; then
   echo "ERROR: HF_TOKEN env var is not set." >&2
   exit 1
 fi
 
-export HF_HOME="${HF_HOME:-${HOME}/.cache/huggingface}"
+export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"  # EDIT: HF cache dir
 export HF_HUB_CACHE="${HF_HUB_CACHE:-${HF_HOME}/hub}"
 export HF_DATASETS_CACHE="${HF_DATASETS_CACHE:-${HF_HOME}/datasets}"
 export TRANSFORMERS_CACHE="${TRANSFORMERS_CACHE:-${HF_HOME}/transformers}"
@@ -89,13 +99,13 @@ MODELS=(
   "google/gemma-3-27b-pt|google/gemma-2-27b"
 
   "meta-llama/Llama-3.1-8B|meta-llama/Meta-Llama-3-8B"
-  "openai/gpt-oss-20b|gpt2-xl"
+  "openai/gpt-oss-20b|openai-community/gpt2-xl|auto"
   "meta-llama/Llama-3.1-70B|meta-llama/Meta-Llama-3-70B"
   "meta-llama/Llama-3.3-70B-Instruct|meta-llama/Llama-3.1-70B-Instruct"
 
   "deepseek-ai/DeepSeek-R1-Distill-Llama-70B|meta-llama/Llama-3.3-70B-Instruct"
-  "openai/gpt-oss-120b|gpt2-xl"
-  "openai/gpt-oss-120b|openai/gpt-oss-20b"
+  "openai/gpt-oss-120b|openai-community/gpt2-xl|auto"
+  "openai/gpt-oss-120b|openai/gpt-oss-20b|auto"
 )
 
 echo "=== Starting O1 + R1-Distill + s1.1-32B MIA sweep ==="
@@ -110,7 +120,7 @@ echo "limit_per_dataset=$LIMIT_PER_DATASET"
 echo "num pairs:    ${#MODELS[@]}"
 echo
 
-python - <<'PY'
+"$PYTHON" - <<'PY'
 import sys
 mods = ["torch", "transformers", "numpy", "matplotlib", "huggingface_hub"]
 missing = []
@@ -130,7 +140,7 @@ PY
 echo "=== Dataset file check ==="
 for fname in \
     "o1_openmath__responses_unicode.jsonl" \
-    "o1__responses_default.jsonl"
+    "o1__responses_ascii.jsonl"
 do
     if [[ -f "$DATASETS_DIR/$fname" ]]; then
         nlines=$(wc -l < "$DATASETS_DIR/$fname")
@@ -142,7 +152,21 @@ done
 echo
 
 for pair in "${MODELS[@]}"; do
-  IFS="|" read -r TARGET REF <<< "$pair"
+  IFS="|" read -r TARGET REF PAIR_DTYPE <<< "$pair"
+
+  is_gptoss=0
+  [[ "$TARGET" == openai/gpt-oss* || "$REF" == openai/gpt-oss* ]] && is_gptoss=1
+  case "$RUN_GROUP" in
+    nogptoss) [[ $is_gptoss -eq 1 ]] && continue ;;
+    gptoss)   [[ $is_gptoss -eq 0 ]] && continue ;;
+    all)      : ;;
+    *) echo "bad RUN_GROUP=$RUN_GROUP" >&2; exit 1 ;;
+  esac
+  # Optional: skip any pair whose TARGET matches this regex (e.g. drop R1/s1.1).
+  if [[ -n "${SKIP_REGEX:-}" && "$TARGET" =~ $SKIP_REGEX ]]; then
+    echo "[SKIP_REGEX] $TARGET"; continue
+  fi
+  PAIR_DTYPE="${PAIR_DTYPE:-$DTYPE}"   # per-pair override; else global DTYPE
 
   T_TAG="$(safe_tag "$TARGET")"
   R_TAG="$(safe_tag "$REF")"
@@ -152,15 +176,16 @@ for pair in "${MODELS[@]}"; do
   echo "------------------------------------------------------------"
   echo "TARGET:    $TARGET"
   echo "REFERENCE: $REF"
+  echo "DTYPE:     $PAIR_DTYPE"
   echo "OUTDIR:    $OUTDIR"
   echo "------------------------------------------------------------"
 
-  python "$SCRIPT_PATH" \
+  "$PYTHON" "$SCRIPT_PATH" \
     --target_model "$TARGET" \
     --ref_model "$REF" \
     --datasets_dir "$DATASETS_DIR" \
     --out_dir "$OUTDIR" \
-    --dtype "$DTYPE" \
+    --dtype "$PAIR_DTYPE" \
     --device_map "$DEVICE_MAP" \
     --ref_device_map "$REF_DEVICE_MAP" \
     --max_memory_per_gpu "$MAX_MEMORY_PER_GPU" \

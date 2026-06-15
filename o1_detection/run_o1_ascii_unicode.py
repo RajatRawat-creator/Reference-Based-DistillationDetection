@@ -3,7 +3,7 @@
 # Matches the Colab reference logic, with two added features:
 # - optional truncation of the teacher answer to max_answer_tokens
 #   BEFORE scoring, excluding the prompt tokens.
-# - per-file non-ASCII re-escaping so *_default.jsonl (which stored chars as
+# - per-file non-ASCII re-escaping so *_ascii.jsonl (which stored chars as
 #   \uXXXX on disk) produces a DIFFERENT tokenization from *_unicode.jsonl
 #   (which stored the raw UTF-8 chars). Without this, json.loads collapses
 #   both forms to the same Python str and the MIA scores come out identical.
@@ -43,10 +43,10 @@ FILES_MAP = {
     #      literal \uXXXX form. The tokenizer sees pure ASCII; e.g. '•'
     #      becomes the 6 chars '\u2022'. This is the only way to preserve
     #      the on-disk distinction between *_unicode.jsonl and
-    #      *_default.jsonl, because json.loads collapses both forms to the
+    #      *_ascii.jsonl, because json.loads collapses both forms to the
     #      same Python str otherwise.
     "o1 (OMI, Unicode)": {"file": "o1_openmath__responses_unicode.jsonl"},
-    "o1 (OMI, ASCII)": {"file": "o1__responses_default.jsonl", "transform": "escape"},
+    "o1 (OMI, ASCII)": {"file": "o1__responses_ascii.jsonl", "transform": "escape"},
 }
 
 
@@ -200,7 +200,7 @@ def load_jsonl(
 
     Optional post-parse transform (applied to both question and response):
       - escape_nonascii: re-escape non-ASCII code points to literal \\uXXXX
-        form (useful to keep *_default.jsonl distinguishable from
+        form (useful to keep *_ascii.jsonl distinguishable from
         *_unicode.jsonl after json.loads collapses them).
 
     Returns (data, stats) where stats summarizes the conversion so the caller
@@ -443,6 +443,10 @@ def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--target_model", required=True, help="HF id or local path")
+    ap.add_argument("--target_tokenizer", default=None,
+                    help="Optional tokenizer source for the target (default: target_model). "
+                         "Use the base model when a fine-tuned checkpoint has a malformed "
+                         "tokenizer_config (same vocab, so tokenization is identical).")
     ap.add_argument("--ref_model", required=True, help="HF id or local path")
     ap.add_argument("--datasets_dir", default=None, help="Default: ./MIADatasetsR1Test next to this script")
     ap.add_argument("--out_dir", required=True)
@@ -451,14 +455,15 @@ def main():
     ap.add_argument("--max_length", type=int, default=4096)
 
     # New: limit only the teacher response tokens, excluding prompt.
-    ap.add_argument("--max_answer_tokens", type=int, default=2048)
+    ap.add_argument("--max_answer_tokens", type=int, default=4000)
 
     ap.add_argument("--answer_truncation_side", choices=["left", "right"], default="right")
     ap.add_argument("--stride", type=int, default=512)
     ap.add_argument("--prompt_prefix_tokens", type=int, default=1000)
     ap.add_argument("--limit_per_dataset", type=int, default=200)
 
-    ap.add_argument("--dtype", choices=["float16", "bfloat16", "float32"], default="float16")
+    ap.add_argument("--dtype", choices=["float16", "bfloat16", "float32", "auto"], default="float16",
+                    help="'auto' keeps the checkpoint's native dtype/quantization (use for GPT-OSS MXFP4).")
     ap.add_argument("--device_map", default="auto")
     ap.add_argument("--ref_device_map", default="cuda:0")
 
@@ -498,7 +503,7 @@ def main():
     script_dir = Path(__file__).resolve().parent
     datasets_dir = Path(args.datasets_dir).expanduser() if args.datasets_dir else (script_dir / "MIADatasetsR1Test")
 
-    torch_dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.dtype]
+    torch_dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32, "auto": "auto"}[args.dtype]
     bnb_compute_dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.bnb_compute_dtype]
 
     quant_config = None
@@ -647,17 +652,18 @@ def main():
     tok = None
     wrap = None
 
+    tok_src = args.target_tokenizer or args.target_model
     try:
         try:
             tok = AutoTokenizer.from_pretrained(
-                args.target_model,
+                tok_src,
                 trust_remote_code=args.trust_remote_code_tgt,
                 local_files_only=args.local_files_only_tgt,
                 fix_mistral_regex=True,
             )
         except Exception:
             tok = AutoTokenizer.from_pretrained(
-                args.target_model,
+                tok_src,
                 trust_remote_code=args.trust_remote_code_tgt,
                 local_files_only=args.local_files_only_tgt,
             )

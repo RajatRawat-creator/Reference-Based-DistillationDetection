@@ -5,7 +5,7 @@ detecting whether a student LLM was distilled from a given teacher (e.g.
 DeepSeek R1, GPT-OSS-120B, Gemma-3-27B-it, Llama-3.3-70B-Instruct, Qwen-3-8B,
 etc.).
 
-The pipeline runs end-to-end in six stages:
+The pipeline runs end-to-end in four stages:
 
 1. **Generate teacher responses** (`generation/`) — one of four base
    teachers (Gemma-3-27B-it, GPT-OSS-120B, Qwen-3-8B, Nvidia-Llama-3.3-70B-Instruct)
@@ -15,12 +15,15 @@ The pipeline runs end-to-end in six stages:
 3. **Reference-normalized loss MIA** (`reference_mia/`) — for each target
    model (controlled student OR wild model), score it against every
    candidate teacher's responses, normalized by a base reference model.
-4. **Normal (non-reference) MIA** (`normal_mia/`) — Min-K% baseline,
-   controlled models only, for comparison with stage 3.
-5. **Margin-threshold classifier** (`classifier/`) — learn a threshold
-   from the controlled MIA results, then classify wild models.
-6. **o1 ASCII / Unicode detection** (`o1_detection/`) — paired
+4. **o1 ASCII / Unicode detection** (`o1_detection/`) — paired
    default-vs-unicode MIA exploiting o1's `\uXXXX` escape signature.
+
+**Results & significance reproduction** (`ReferenceMIAResults/`) — every
+teacher-identification, threshold-generalization (LOSO / leave-one-teacher-out),
+and o1 number in the paper is reproduced **CPU-only** from the gathered ref-norm
+JSONs by the self-checking scripts in `ReferenceMIAResults/scripts/` (see
+`ReferenceMIAResults/README.md`). This replaces the old `classifier/` and
+`significance/` folders.
 
 All datasets ship in `data/`.
 
@@ -49,26 +52,22 @@ DistillDetectRelease/
 │   ├── run_wild.sh
 │   ├── run_omi_cot.py                #   For OMI-CoT students (few-shot probe)
 │   ├── run_omi_cot.sh
-│   ├── pairs_controlled.csv          #   target,reference manifest (20 students)
-│   ├── pairs_wild.csv                #   target,reference manifest (18 wild models)
+│   ├── pairs_controlled_data.csv     #   target,reference manifest (controlled students)
+│   ├── pairs_wild.csv                #   target,reference manifest (R1-distills, s1.1, QwQ, GPT-OSS)
+│   ├── pairs_xcoder.csv              #   X-Coder only (activates 11-teacher pool, +Qwen-3-235B)
 │   └── pairs_omi_cot.csv             #   target,reference,fewshot_subdir (4 OMI-CoT students)
-├── normal_mia/                       # Stage 4: Min-K% baseline (controlled only)
-│   ├── run_controlled.py
-│   └── run_controlled.sh
-├── classifier/                       # Stage 5: margin-threshold classifier
-│   ├── build_threshold.py            #   Assembles classifier-ready CSV from MIA results
-│   ├── apply_threshold.py            #   Learns threshold + scores wild models
-│   └── utils.py
-├── o1_detection/                     # Stage 6: o1 ASCII-vs-Unicode detection
+├── o1_detection/                     # Stage 4: o1 ASCII-vs-Unicode detection
 │   ├── run_o1_ascii_unicode.py
 │   └── run_o1_ascii_unicode.sh
+├── ReferenceMIAResults/              # Gathered ref-norm results + CPU-only reproduction
+│   ├── controlled/  OMI_COT/  ModelsInTheWild/  OpenQuestions/   # all ref-norm JSONs
+│   ├── scripts/                      #   reproduce_*.py (tables, LOSO/LOTO, o1, open-world) + plot_figures.py
+│   └── README.md
 └── data/                             # ALL datasets (no external download)
     ├── README.md
     ├── training/                     #   Teacher SFT data (reused as MIA input)
-    ├── wild/                         #   MIA scoring inputs for wild models
+    ├── wild/                         #   wild MIA inputs (10 teachers + Qwen-3-235B for XCoder; _files_map_xcoder.json)
     ├── o1/                           #   o1 default-vs-unicode pairs
-    ├── classifier/                   #   controlled_dataset_10f.csv
-    ├── reference_mia/                #   pre-computed MIA result JSONs (controlled + wild)
     ├── MIADatasets/                  #   controlled reference-MIA candidate responses (200 rows)
     └── omi_cot_fewshot/              #   per-student few-shot candidate responses (OMI-CoT students)
 ```
@@ -105,7 +104,7 @@ Checkpoints land under `checkpoints/...` (override via `SFT_OUTPUT_DIR`).
 ### 3. Reference-normalized MIA
 
 ```bash
-sbatch reference_mia/run_controlled.sh       # iterates pairs_controlled.csv (data/MIADatasets)
+sbatch reference_mia/run_controlled.sh       # iterates pairs_controlled_data.csv (data/MIADatasets)
 sbatch reference_mia/run_wild.sh             # iterates pairs_wild.csv (data/wild, 10-teacher pool)
 sbatch reference_mia/run_omi_cot.sh          # OMI-CoT students (data/omi_cot_fewshot)
 ```
@@ -113,28 +112,25 @@ sbatch reference_mia/run_omi_cot.sh          # OMI-CoT students (data/omi_cot_fe
 Each (target, reference) pair writes `<target>__results.json` under
 `outputs/reference_mia_{controlled,wild,omi_cot}/`.
 
-### 4. (Optional) Normal MIA baseline
-
-```bash
-sbatch normal_mia/run_controlled.sh
-```
-
-### 5. Apply the threshold classifier
-
-```bash
-python classifier/build_threshold.py                 # builds data/classifier/controlled_dataset_10f.csv from MIA outputs
-python classifier/apply_threshold.py                 # default max-F1 threshold + wild scoring
-python classifier/apply_threshold.py --threshold p95
-python classifier/apply_threshold.py --eval-controlled
-```
-
-If you're only consuming the released CSV, skip `build_threshold.py` —
-`data/classifier/controlled_dataset_10f.csv` is already populated.
-
-### 6. o1 detection
+### 4. o1 detection
 
 ```bash
 sbatch o1_detection/run_o1_ascii_unicode.sh
+```
+
+### 5. Reproduce every paper number (CPU-only, no GPU)
+
+All teacher-identification, threshold-generalization (LOSO / leave-one-teacher-out),
+and o1 results reproduce from the gathered ref-norm JSONs — each script ends with a
+self-checking `VERIFICATION: N/N PASS`:
+
+```bash
+cd ReferenceMIAResults/scripts
+python reproduce_tables.py                    # controlled + real-world accuracy, top-1 significance
+python reproduce_threshold_generalization.py  # margin threshold + LOSO / leave-one-teacher-out + significance
+python reproduce_o1_ascii_unicode.py          # controlled o1 ASCII-vs-Unicode table
+python reproduce_open_questions.py             # open-world o1 significance + same-family-excluded rankings
+python plot_figures.py                         # replot the ranked CDF figures
 ```
 
 ## File-by-file equivalence with the original codebase
@@ -162,20 +158,15 @@ files are scored — data wiring, not algorithm). No changes to the MIA / scorin
 | `reference_mia/run_controlled.py`                  | `NewScripts/run_reference_attack_server.py`                                |
 | `reference_mia/run_wild.py`                        | `NewScripts/run_reference_attack_server.py`                                |
 | `reference_mia/run_omi_cot.py`                     | `NewScripts/run_reference_attack_server.py` (few-shot `FILES_MAP` only)    |
-| `normal_mia/run_controlled.py`                     | `scripts/run_reference_attack_server_MINK.py`                              |
 | `o1_detection/run_o1_ascii_unicode.py`             | `NewScripts/run_reference_attack_o1_controlled.py`                         |
 | `o1_detection/run_o1_ascii_unicode.sh`             | `NewScripts/run_reference_attack_o1_controlled.sh`                         |
-| `classifier/build_threshold.py`                    | `scripts/FINALGITHUBALLSCRIPTS/Classifier/build_dataset_10f.py`            |
-| `classifier/apply_threshold.py`                    | `scripts/FINALGITHUBALLSCRIPTS/Classifier/eval_threshold_r1distill.py`     |
-| `classifier/utils.py`                              | `scripts/FINALGITHUBALLSCRIPTS/Classifier/utils.py`                        |
 | `data/training/Teacher=*.jsonl`                    | `scripts/FINALGITHUBALLSCRIPTS/SFTDatasets{,OLDD}/Teacher=*.jsonl`         |
 | `data/MIADatasets/*` (controlled candidates)       | cleaned 200-row teacher responses (Gemma/Llama/GPT-OSS/Qwen, OMI+s1)       |
 | `data/wild/*` (Gemma/Llama/GPT-OSS)                | identical to `data/MIADatasets/` (same 3 teachers)                        |
-| `data/wild/*` (Claude/R1/o1/o3/QwQ-Preview)        | `scripts/collected_outputs/` + `NewScripts/R1testUnicode_upload/collected_outputs/` |
+| `data/wild/*` (Claude/R1/o1/o3/QwQ-Preview/Qwen-3-235B) | `scripts/collected_outputs/` + `NewScripts/R1testUnicode_upload/collected_outputs/` |
 | `data/o1/*`                                        | `NewScripts/O1_UnicodeandASCII/*`                                          |
-| `data/classifier/controlled_dataset_10f.csv`       | `scripts/FINALGITHUBALLSCRIPTS/Classifier/controlled_dataset_10f.csv`      |
-| `data/reference_mia/controlled/*.json`             | `scripts/FINALGITHUBALLSCRIPTS/ReferenceMIAResults/*.json`                 |
-| `data/reference_mia/wild/*__REF__*/*__results.json`| `NewScripts/ModelsinTheWildOutputs/*__REF__*/*__results.json`             |
+| `ReferenceMIAResults/controlled/*.json`            | `scripts/FINALGITHUBALLSCRIPTS/ReferenceMIAResults/*.json`                 |
+| `ReferenceMIAResults/ModelsInTheWild/...*__results.json` | `NewScripts/ModelsinTheWildOutputs/*__REF__*/*__results.json`        |
 
 ## Reproducing each headline result
 
@@ -185,40 +176,46 @@ run the corresponding stage first.
 
 | Result | Command(s) | Reads | Notes |
 |---|---|---|---|
-| **Controlled classifier threshold** (max-F1 ≈ 0.067) | `python classifier/apply_threshold.py --eval-controlled` | `data/classifier/controlled_dataset_10f.csv` | learns + reports on controlled set |
-| **Wild 10-way detection accuracy** | `python classifier/apply_threshold.py` | `data/reference_mia/wild/` | applies the threshold to the wild R1-distill / s1.1 models |
-| **Rebuild the controlled feature CSV** | `python classifier/build_threshold.py` | `data/reference_mia/controlled/` | reproduces `data/classifier/controlled_dataset_10f.csv` byte-for-byte |
+| **Controlled + real-world accuracy, top-1 significance** | `python ReferenceMIAResults/scripts/reproduce_tables.py` | `ReferenceMIAResults/` | CPU; 27/27 checks |
+| **Margin threshold + LOSO / leave-one-teacher-out + significance** | `python ReferenceMIAResults/scripts/reproduce_threshold_generalization.py` | `ReferenceMIAResults/` | CPU; fold-fit τ (max-F1 ≈ 0.067); 38/38 checks |
+| **o1 ASCII-vs-Unicode table (controlled)** | `python ReferenceMIAResults/scripts/reproduce_o1_ascii_unicode.py` | `ReferenceMIAResults/` | CPU; 54/54 checks |
+| **Open-world o1 significance + same-family-excluded rankings** | `python ReferenceMIAResults/scripts/reproduce_open_questions.py` | `ReferenceMIAResults/` | CPU; 25/25 checks |
 | **Reference MIA — controlled students** | `sbatch reference_mia/run_controlled.sh` | `data/MIADatasets/`, checkpoints | GPU; writes `outputs/reference_mia_controlled/` |
 | **Reference MIA — wild models** (10-teacher pool) | `sbatch reference_mia/run_wild.sh` | `data/wild/` | GPU; downloads wild target models from HF |
+| **Reference MIA — XCoder** (11-teacher pool, +Qwen-3-235B) | `DATASETS_DIR=../data/wild PAIRS_CSV=pairs_xcoder.csv sbatch reference_mia/run_wild.sh` | `data/wild/` (`_files_map_xcoder.json`) | GPU; auto-activates the 11-way pool |
 | **Reference MIA — OMI-CoT few-shot** (Reference_Fewshot) | `sbatch reference_mia/run_omi_cot.sh` | `data/omi_cot_fewshot/`, checkpoints | GPU; "+ in-context exemplars from S" |
-| **Non-reference MIA baseline** (Min-K%) | `sbatch normal_mia/run_controlled.sh` | `data/MIADatasets/`, checkpoints | GPU; baseline for comparison |
 | **o1 ASCII-vs-Unicode detection** | `sbatch o1_detection/run_o1_ascii_unicode.sh` | `data/o1/` | GPU |
 | **(Re)generate teacher responses** | `sbatch generation/run_local_gen.sh` (+ `_GPTOSS.sh`) | your question JSONL | GPU; optional — data ships pre-computed |
 | **(Re)generate OMI-CoT few-shot candidates** | `sbatch generation/run_fewshot_gen.sh` | `generation/FewShotPrompts/` | GPU; rebuilds `data/omi_cot_fewshot/` |
 
-GPU stages write to `outputs/` (gitignored). To feed a fresh wild run into the
-classifier: `python classifier/apply_threshold.py --wild-dir outputs/reference_mia_wild`.
+GPU stages write to `outputs/` (gitignored); the reproduction scripts above read the
+shipped `ReferenceMIAResults/` JSONs and need no GPU. To score a fresh wild run,
+copy its `*__results.json` into `ReferenceMIAResults/ModelsInTheWild/ReferenceMIA/`.
 
 ## Cluster / environment notes
 
-The `.sh` / `sbatch` launchers were written for a SLURM cluster (Berkeley NLP).
-Before running on your machine, adjust per launcher:
+The GPU `.sh` launchers were written for a SLURM cluster. They no longer hardcode
+any machine-specific path — the spots you may need to change are marked with
+`# EDIT:` comments and/or honor environment-variable overrides:
 
-- the `conda activate <env>` line and the `#SBATCH` directives (`-p`, `--gpus`, …);
-- the cache exports (`HF_HOME`, `VLLM_CACHE_ROOT`, `XDG_CACHE_HOME`) — point them
-  at writable paths or delete them;
-- input/output path variables (`QUESTIONS`, `OUT_DIR`, `CHECKPOINTS_DIR`,
-  `DATASETS_DIR`) — most honor env-var overrides.
+- **`HF_TOKEN`** — set it in your environment (`export HF_TOKEN=hf_...`), or paste
+  it into the `hf_PASTE_YOUR_TOKEN_HERE` placeholder in each launcher. Required for
+  gated models (Llama, Gemma); the launchers fail fast if unset.
+- **`PYTHON`** — defaults to `python`; set it to your env's interpreter if needed
+  (`PYTHON=/path/to/env/bin/python sbatch ...`).
+- **`#SBATCH` directives** — partition (`-p`), node (`--nodelist`), QOS, `--gpus`,
+  `--time` are placeholders/cluster-specific; set them for your scheduler.
+- **`HF_HOME`** — defaults to `$HOME/.cache/huggingface`; override for a different
+  cache location.
+- **`CHECKPOINTS_DIR`** — where `training/` wrote the student checkpoints (default
+  `../checkpoints`).
+- **Running under `sbatch`** — SLURM copies the script to a spool dir, so the
+  default `cd "$(dirname "$0")"` can't find `../data`; the launchers note the
+  absolute `cd` to substitute (or run them directly with `bash`).
 
-`export HF_TOKEN=hf_...` is required for gated models (Llama, Gemma); every
-launcher fails fast if it is unset.
+The CPU-only reproduction (`ReferenceMIAResults/scripts/*.py`) needs none of this —
+just `pip install -r requirements.txt`.
 
-## Known gaps
-
-- **Gemma-3-27B-it teacher SFT data** is not shipped as a
-  `Teacher=Gemma-3-27B-it_*.jsonl` SFT file — only its MIA candidate responses
-  (`data/MIADatasets/gemma-3-27b-it__*.jsonl`, `data/wild/gemma-3-27b-it__*`).
-  To train a Gemma-teacher student you must (re)generate that SFT set.
 - **Wild-model + closed-API generation** (R1, Claude, o1/o3, QwQ) used external
   services (OpenRouter / vendor APIs) and is not scripted here; their responses
   ship pre-generated in `data/wild/` (redistribution subject to vendor TOS).

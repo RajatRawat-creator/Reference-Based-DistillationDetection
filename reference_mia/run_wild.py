@@ -25,35 +25,35 @@ import matplotlib.pyplot as plt
 # (data/MIADatasets); the rest are the (200)-row collected outputs. All live in
 # data/wild/ (pass --datasets_dir ../data/wild).
 FILES_MAP = {
-    "Gemma-3-27B-it (OMI, Response Only)": "gemma-3-27b-it__openmath_jsonl__chat__vllm.jsonl",
-    "Gemma-3-27B-it (s1, Response Only)": "gemma-3-27b-it__s1k__chat__vllm.jsonl",
+    "Gemma-3-27B-it (OMI)": "Gemma-3-27B-it_omi(200).jsonl",
+    "Gemma-3-27B-it (s1)": "Gemma-3-27B-it_s1(200).jsonl",
 
-    "Llama-3.3-70B-Instruct (OMI, Response)": "Llama-3.3-70B-Instruct-FP8__openmath_jsonl__chat__vllm.jsonl",
-    "Llama-3.3-70B-Instruct (s1, Response)": "Llama-3.3-70B-Instruct-FP8__s1k__chat__vllm.jsonl",
+    "Llama-3.3-70B-Instruct (OMI)": "Llama-3.3-70B-Instruct_omi(200).jsonl",
+    "Llama-3.3-70B-Instruct (s1)": "Llama-3.3-70B-Instruct_s1(200).jsonl",
 
-    "GPT-OSS-120B (OMI, Response)": "gpt-oss-120b__openmath_jsonl__chat__vllmCLEAN.jsonl",
-    "GPT-OSS-120B (s1, Response)": "gpt-oss-120b__s1k__chat__vllmCLEAN.jsonl",
+    "GPT-OSS-120B (OMI)": "GPT-OSS-120B_omi(200).jsonl",
+    "GPT-OSS-120B (s1)": "GPT-OSS-120B_s1(200).jsonl",
 
-    "Claude-3.5-Sonnet (OMI, Response Only)": "Claude-Sonnet-3.5_omi(200).jsonl",
-    "Claude-3.5-Sonnet (s1, Response Only)": "Claude-Sonnet-3.5_s1(200).jsonl",
+    "Claude-3.5-Sonnet (OMI)": "Claude-Sonnet-3.5_omi(200).jsonl",
+    "Claude-3.5-Sonnet (s1)": "Claude-Sonnet-3.5_s1(200).jsonl",
 
-    "Claude Opus 4.5 (OMI, Trace + Response)": "claude-opus-4-5-20251101__openmath_jsonl__chat__claude_reasoning_only__REPAIRED.jsonl",
-    "Claude Opus 4.5 (s1, Trace + Response)": "claude-opus-4-5-20251101__s1k__chat__claude_reasoning_only__REPAIRED.jsonl",
+    "Claude Opus 4.5 (OMI)": "Claude-Opus-4.5_omi(200).jsonl",
+    "Claude Opus 4.5 (s1)": "Claude-Opus-4.5_s1(200).jsonl",
 
-    "Claude Opus 4.6 (OMI, Trace + Response)": "Claude-Opus-4.6_omi(200)_reasoningonly.jsonl",
-    "Claude Opus 4.6 (s1, Trace + Response)": "Claude-Opus-4.6_s1(200)_reasoningonly.jsonl",
+    "Claude Opus 4.6 (OMI)": "Claude-Opus-4.6_omi(200).jsonl",
+    "Claude Opus 4.6 (s1)": "Claude-Opus-4.6_s1(200).jsonl",
 
-    "DeepSeek R1 (OMI, Trace + Response)": "R1_omi(200)_reasoningonly.jsonl",
-    "DeepSeek R1 (s1, Trace + Response)": "R1_s1(200)_reasoningonly.jsonl",
+    "DeepSeek R1 (OMI)": "DeepSeek-R1_omi(200).jsonl",
+    "DeepSeek R1 (s1)": "DeepSeek-R1_s1(200).jsonl",
 
-    "o1 (OMI, Response Only)": "o1_omi(200).jsonl",
-    "o1 (s1, Response Only)": "o1_s1(200).jsonl",
+    "o1 (OMI)": "o1_omi(200).jsonl",
+    "o1 (s1)": "o1_s1(200).jsonl",
 
-    "o3 (OMI, Response Only)": "o3_omi(200).jsonl",
-    "o3 (s1, Response Only)": "o3_s1(200).jsonl",
+    "o3 (OMI)": "o3_omi(200).jsonl",
+    "o3 (s1)": "o3_s1(200).jsonl",
 
-    "QwQ-32B Preview (OMI, Trace + Response)": "QwQ-32B-Preview-omi(200).jsonl",
-    "QwQ-32B Preview (s1, Trace + Response)": "QwQ-32B-Preview-s1(200).jsonl",
+    "QwQ-32B Preview (OMI)": "QwQ-32B-Preview_omi(200).jsonl",
+    "QwQ-32B Preview (s1)": "QwQ-32B-Preview_s1(200).jsonl",
 }
  
 
@@ -390,9 +390,16 @@ def main():
     ap.add_argument("--prompt_prefix_tokens", type=int, default=1000)
     ap.add_argument("--limit_per_dataset", type=int, default=200)
  
-    ap.add_argument("--dtype", choices=["float16", "bfloat16", "float32"], default="float16")
+    ap.add_argument("--dtype", choices=["float16", "bfloat16", "float32", "auto"], default="float16",
+                    help="'auto' keeps the checkpoint's native dtype/quantization (use for GPT-OSS MXFP4).")
     ap.add_argument("--device_map", default="auto")
     ap.add_argument("--ref_device_map", default="cuda:0")
+    ap.add_argument(
+        "--attn_implementation",
+        choices=["eager", "sdpa", "flash_attention_2"],
+        default=None,
+        help="Optional Transformers attention backend for target and reference models.",
+    )
  
     # Per-GPU memory cap for device_map=auto on the TARGET model.
     # Prevents the placer from over-committing a GPU, which causes
@@ -426,7 +433,7 @@ def main():
     script_dir = Path(__file__).resolve().parent
     datasets_dir = Path(args.datasets_dir).expanduser() if args.datasets_dir else (script_dir / "MIADatasetsR1Test")
  
-    torch_dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.dtype]
+    torch_dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32, "auto": "auto"}[args.dtype]
     bnb_compute_dtype = {"float16": torch.float16, "bfloat16": torch.bfloat16, "float32": torch.float32}[args.bnb_compute_dtype]
  
     quant_config = None
@@ -446,9 +453,19 @@ def main():
         target_max_memory["cpu"] = args.max_memory_cpu
         print(f"[INFO] target max_memory: {target_max_memory}")
  
+    # Optional per-directory override: drop a `_files_map.json` ({label: filename})
+    # into the datasets_dir to score a custom set (e.g. the response_only/ files)
+    # without touching the hardcoded FILES_MAP. data/wild has none -> unchanged.
+    files_map = FILES_MAP
+    _fm_path = datasets_dir / "_files_map.json"
+    if _fm_path.exists():
+        with open(_fm_path) as _f:
+            files_map = json.load(_f)
+        print(f"[INFO] using custom files_map ({len(files_map)} datasets) from {_fm_path}")
+
     datasets = {}
     print("--- Loading Datasets ---")
-    for label, filename in FILES_MAP.items():
+    for label, filename in files_map.items():
         try:
             resolved = resolve_dataset_file(datasets_dir, filename)
         except FileNotFoundError as e:
@@ -475,6 +492,10 @@ def main():
     if ref_tok.pad_token is None:
         ref_tok.pad_token = ref_tok.eos_token
  
+    ref_model_kwargs = {}
+    if args.attn_implementation is not None:
+        ref_model_kwargs["attn_implementation"] = args.attn_implementation
+
     if args.load_in_4bit:
         ref_model = AutoModelForCausalLM.from_pretrained(
             args.ref_model,
@@ -482,6 +503,7 @@ def main():
             quantization_config=quant_config,
             trust_remote_code=args.trust_remote_code_ref,
             low_cpu_mem_usage=True,
+            **ref_model_kwargs,
         )
     else:
         ref_model = AutoModelForCausalLM.from_pretrained(
@@ -490,6 +512,7 @@ def main():
             torch_dtype=torch_dtype,
             trust_remote_code=args.trust_remote_code_ref,
             low_cpu_mem_usage=True,
+            **ref_model_kwargs,
         )
     ref_model.eval()
  
@@ -549,6 +572,10 @@ def main():
         if tok.pad_token is None:
             tok.pad_token = tok.eos_token
  
+        model_kwargs = {}
+        if args.attn_implementation is not None:
+            model_kwargs["attn_implementation"] = args.attn_implementation
+
         if args.load_in_4bit:
             model = AutoModelForCausalLM.from_pretrained(
                 args.target_model,
@@ -558,6 +585,7 @@ def main():
                 local_files_only=args.local_files_only_tgt,
                 low_cpu_mem_usage=True,
                 max_memory=target_max_memory,
+                **model_kwargs,
             )
         else:
             model = AutoModelForCausalLM.from_pretrained(
@@ -568,6 +596,7 @@ def main():
                 local_files_only=args.local_files_only_tgt,
                 low_cpu_mem_usage=True,
                 max_memory=target_max_memory,
+                **model_kwargs,
             )
         model.eval()
  

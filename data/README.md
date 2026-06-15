@@ -6,13 +6,16 @@ All datasets ship inside this repo. No external download step.
 
 | Folder              | Contents                                                                  | Consumers                                |
 |---------------------|---------------------------------------------------------------------------|------------------------------------------|
-| `training/`         | Teacher response JSONLs used for student SFT, **also** used as MIA inputs | `training/`, `reference_mia/`, `normal_mia/` |
-| `wild/`             | MIA scoring inputs for wild-model evaluation                              | `reference_mia/run_wild.py`              |
+| `training/`         | Teacher response JSONLs used for student SFT, **also** used as MIA inputs | `training/`, `reference_mia/` |
+| `wild/`             | Wild-model MIA scoring inputs: 10-teacher pool + Qwen-3-235B (for XCoder) and `_files_map_xcoder.json` | `reference_mia/run_wild.py` |
 | `o1/`               | o1 default-vs-unicode paired JSONLs                                       | `o1_detection/run_o1_ascii_unicode.py`   |
-| `classifier/`       | `controlled_dataset_10f.csv` — 10-feature classifier dataset from paper   | `classifier/apply_threshold.py`          |
-| `reference_mia/`    | Pre-computed reference-MIA result JSONs (controlled students + wild models) | `classifier/build_threshold.py`, `classifier/apply_threshold.py` |
 | `MIADatasets/`      | Controlled-model reference-MIA candidate responses (4 teachers × OMI/s1, 200 rows, cleaned) | `reference_mia/run_controlled.py` |
 | `omi_cot_fewshot/`  | Per-student few-shot reference-MIA candidate responses for OMI-CoT students | OMI-CoT reference MIA (Reference_Fewshot) |
+
+> The pre-computed reference-MIA **result** JSONs (formerly `data/reference_mia/`
+> and `data/classifier/`) now live under `../ReferenceMIAResults/`, alongside the
+> CPU-only reproduction scripts. This `data/` folder holds only the **inputs**
+> (candidate responses, SFT/probe data) consumed by the GPU runners.
 
 ## `training/` provenance
 
@@ -30,57 +33,63 @@ Files in this release:
 - `Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat-TraceOnly.jsonl`
 - `Teacher=Qwen-3-8B_Data=S1_Template=Chat-TraceOnly.jsonl`
 
-### Known gap — Gemma-3-27B-it teacher data
-
-The paper's 4th teacher (`google/gemma-3-27b-it`) does **not** appear as a
-`Teacher=Gemma-3-27B-it_*.jsonl` here. Its response JSONLs were stored
-under the wild-MIA naming convention instead:
-
-- `wild/gemma-3-27b-it__s1k__chat__vllm.jsonl`
-- `wild/gemma-3-27b-it__openmath_jsonl__chat__vllm (1).jsonl`
-
-If you want to retrain the controlled students from scratch on a Gemma
-teacher, copy those two files into `training/` and rename them to the
-`Teacher=Gemma-3-27B-it_Data=<...>_Template=Chat.jsonl` convention.
-
 ## `wild/` provenance
 
 The teacher-candidate pool for the **wild** reference MIA — a 10-way
-classification over these 10 teacher models, each with an OMI and an s1
-response set (200 rows each, 20 files total), consumed by
-`reference_mia/run_wild.py` (its `FILES_MAP`):
+classification over these 10 teacher models (11-way for X-Coder, which adds
+Qwen-3-235B), each with an OMI and an s1 response set (200 rows each). All files
+follow a uniform `<model>_omi(200).jsonl` / `<model>_s1(200).jsonl` naming. This
+folder holds exactly the files consumed by `reference_mia/run_wild.py` (its
+`FILES_MAP`, 20 files) plus the two Qwen-3-235B files used for the X-Coder
+11-way pool via `_files_map_xcoder.json` — **22 jsonl files total**:
 
-| Teacher | OMI / s1 files | Source |
+| Teacher | files (`_omi(200).jsonl` / `_s1(200).jsonl`) | Source |
 |---|---|---|
-| Gemma-3-27B-it | `gemma-3-27b-it__…__vllm.jsonl` | **= `data/MIADatasets/`** (identical to controlled) |
-| Llama-3.3-70B-Instruct | `Llama-3.3-70B-Instruct-FP8__…__chat__vllm.jsonl` | **= `data/MIADatasets/`** |
-| GPT-OSS-120B | `gpt-oss-120b__…__vllmCLEAN.jsonl` | **= `data/MIADatasets/`** |
-| Claude 3.5 Sonnet | `Claude-Sonnet-3.5_{omi,s1}(200).jsonl` | `collected_outputs` |
-| Claude Opus 4.5 | `claude-opus-4-5-…_reasoning_only__REPAIRED.jsonl` | `collected_outputs` |
-| Claude Opus 4.6 | `Claude-Opus-4.6_{omi,s1}(200)_reasoningonly.jsonl` | `collected_outputs` |
-| DeepSeek R1 | `R1_{omi,s1}(200)_reasoningonly.jsonl` | `collected_outputs` |
-| o1 | `o1_{omi,s1}(200).jsonl` | `collected_outputs` |
-| o3 | `o3_{omi,s1}(200).jsonl` | `collected_outputs` |
-| QwQ-32B-Preview | `QwQ-32B-Preview_{omi,s1}(200).jsonl` | `collected_outputs` |
+| Gemma-3-27B-it | `Gemma-3-27B-it_*` | **content = `data/MIADatasets/`** (identical to controlled) |
+| Llama-3.3-70B-Instruct | `Llama-3.3-70B-Instruct_*` | **content = `data/MIADatasets/`** (FP8) |
+| GPT-OSS-120B | `GPT-OSS-120B_*` | **content = `data/MIADatasets/`** |
+| Claude 3.5 Sonnet | `Claude-Sonnet-3.5_*` | `collected_outputs` |
+| Claude Opus 4.5 | `Claude-Opus-4.5_*` | `collected_outputs` (trace + response) |
+| Claude Opus 4.6 | `Claude-Opus-4.6_*` | `collected_outputs` (trace + response) |
+| DeepSeek R1 | `DeepSeek-R1_*` | `collected_outputs` (reasoning + response) |
+| o1 | `o1_*` | `collected_outputs` (trace + response) |
+| o3 | `o3_*` | `collected_outputs` (trace + response) |
+| QwQ-32B-Preview | `QwQ-32B-Preview_*` | `collected_outputs` |
+| Qwen-3-235B *(X-Coder pool only)* | `Qwen-3-235B_*` | `collected_outputs` (reasoning + response) |
 
-The Gemma / Llama / GPT-OSS files are **byte-identical** to the same three
-teachers in `data/MIADatasets/`, so the controlled and wild pools share an
-identical candidate distribution for those teachers. The closed-API outputs
-(Claude, OpenAI) were generated via OpenRouter / direct API and are included
-verbatim — redistributability is subject to each vendor's TOS, the user's
-responsibility.
+All 22 files have the full 200 rows, share the same 200 OMI / 200 s1 questions,
+and carry a non-empty response (trace/reasoning + response, or response). The
+Gemma / Llama / GPT-OSS files are **content-identical** to the same three teachers
+in `data/MIADatasets/` (only the data/wild copies were renamed to this uniform
+scheme; the `data/MIADatasets/` copies keep their original `__…__chat__vllm`
+names, since the controlled runner reads those). The closed-API outputs (Claude,
+OpenAI) were generated via OpenRouter / direct API and are included verbatim —
+redistributability is subject to each vendor's TOS, the user's responsibility.
+
+> **Note — truncation.** Reference MIA scores only the **first 2,048 tokens** of
+> each teacher answer (`--max_answer_tokens 2048` in the `reference_mia/` runners),
+> so for long reasoning traces the responses stored here are effectively truncated
+> at scoring time — only their leading 2,048 answer tokens contribute to the
+> reference-normalized loss.
+
+## `MIADatasets/` provenance
+
+The controlled candidate-teacher responses (4 teachers × OMI/s1, 200 rows each),
+consumed by `reference_mia/run_controlled.py`.
+
+> **Note — format-marker stripping.** For two teachers we strip the format
+> scaffolding from the responses so detection can't lean on an obvious stylistic
+> giveaway (making the task harder / more realistic): the **Qwen-3-8B** files
+> (`Qwen3-8B__…__vllm_cleaned.jsonl`) have the `<think>…</think>` tags removed,
+> and the **GPT-OSS-120B** files (`gpt-oss-120b__…__vllmCLEAN.jsonl`) have the
+> harmony `assistantfinal` / channel markers removed. The same cleaned content is
+> what appears for these teachers in `data/wild/`.
 
 ## `o1/` provenance
 
 Two JSONLs that differ only in non-ASCII encoding (escape vs raw UTF-8) —
 used by `o1_detection/` to detect o1-distillation via the
 `\uXXXX` escape signature.
-
-## `classifier/` provenance
-
-`controlled_dataset_10f.csv` is identical to the canonical paper artifact at
-`scripts/FINALGITHUBALLSCRIPTS/Classifier/controlled_dataset_10f.csv`. It
-is regenerable from controlled MIA outputs via `classifier/build_threshold.py`.
 
 ## `omi_cot_fewshot/` provenance
 
@@ -109,24 +118,13 @@ condition (`Reference_Fewshot`) and improves teacher identification over the
 plain reference MIA (`Reference_NonFewshot`).
 
 Byte-identical to `scripts/teacher_gen_outputs_s1_fewshot/<same subdirs>/`.
-Generated by `scripts/generate_teacher_vllm_fewshot.py`; the downstream result
-JSONs are analyzed by
-`scripts/FINALGITHUBALLSCRIPTS/MethodEvaluationScripts/eval_omicot_reference.py`.
+Generated by `scripts/generate_teacher_vllm_fewshot.py`. The downstream result
+JSONs (and all other pre-computed reference-MIA results) live under
+`../ReferenceMIAResults/` and are analyzed by its `scripts/reproduce_*.py`.
 
-## `reference_mia/` provenance
+## Pre-computed results
 
-Pre-computed reference-normalized loss MIA result JSONs, so the classifier
-stage runs without re-running stage 3.
-
-- `reference_mia/controlled/` — 19 JSONs, byte-identical to
-  `scripts/FINALGITHUBALLSCRIPTS/ReferenceMIAResults/*.json`. These are the
-  default input to `classifier/build_threshold.py` (which rebuilds
-  `classifier/controlled_dataset_10f.csv` from them — verified byte-identical).
-- `reference_mia/wild/<TARGET>__REF__<REF>/<MODEL>__results.json` — 17 JSONs,
-  byte-identical to `NewScripts/ModelsinTheWildOutputs/<...>/*__results.json`.
-  These are the default input to `classifier/apply_threshold.py` (which scores
-  the 7 R1-distill / s1.1 wild models in its `R1_SUBDIRS` list).
-
-Both default paths can be overridden: `REF_MIA_RESULTS_DIR` /
-`--input-dir` for the build step, `DD_WILD_DIR` / `--wild-dir` for apply —
-e.g. point them at a fresh `outputs/reference_mia_*` run.
+The reference-MIA **result** JSONs are not under `data/` — they are gathered in
+`../ReferenceMIAResults/` (`controlled/`, `OMI_COT/`, `ModelsInTheWild/`,
+`OpenQuestions/`) together with the CPU-only reproduction scripts that recompute
+every paper number from them.
