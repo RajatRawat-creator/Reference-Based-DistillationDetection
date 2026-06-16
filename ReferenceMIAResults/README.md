@@ -40,11 +40,41 @@ python reproduce_threshold_generalization.py # threshold-generalization section 
 python reproduce_o1_ascii_unicode.py         # o1 ASCII-vs-Unicode table (controlled, Ours)
 python reproduce_open_questions.py           # open-world o1_sig table (Ours)
 python plot_figures.py                       # replot ranked CDF figures -> ../figures/
+python gather_results.py                     # rebuild THIS tree from raw GPU outputs
 ```
 
 Only **our** (reference-based) results are verified by these scripts — baselines
 (length-matching, string methods, non-reference MIA, R1-answers-only) are out of
 scope and not recomputed here.
+
+### `gather_results.py` — rebuild this tree from raw GPU outputs
+The `reference_mia/` and `o1_detection/` scripts write per-pair `*__results.json`
+under `outputs/...` with producer-side names; this curated tree uses fixed folders
+and filenames. `gather_results.py` rebuilds the exact curated layout: for each raw
+output it reads the file's own `model_name` / `ref_model` / candidate-key list,
+looks the resulting content-key up in the committed `results_manifest.json`, and
+copies the file to its checked-in relative path **verbatim** (filenames and all).
+Nothing is renamed by rule and no consumer script changes — the rebuilt tree is
+byte-identical, so the `reproduce_*.py` / `plot_figures.py` paths keep resolving.
+
+```bash
+python gather_results.py                       # scan ../../outputs -> ../../ReferenceMIAResults_rebuilt
+python gather_results.py --inputs DIR [DIR..]  # scan specific output dirs
+python gather_results.py --in-place            # write into ReferenceMIAResults/ itself
+```
+
+By default it writes to a sibling `ReferenceMIAResults_rebuilt/` (gitignored) so you
+can `diff -r` against the committed tree before trusting it. It reports placed /
+unmatched / not-yet-produced counts. `results_manifest.json` is regenerated only
+when the curated layout changes, via `_gen_results_manifest.py`.
+
+**Two files are NOT gathered** (manifest `source="combine"`): the DeepSeek-R1
+results referenced to DeepSeek-MoE-16B —
+`OpenQuestions/ReferenceMIA/.../DeepSeek-R1__results.json` and
+`OpenQuestions/o1AsciiUnicode/DeepSeek-R1__o1_ascii_unicode__results.json`. These
+are built by `_build_from_collected_losses.py` from the OLD MoE-16B collected
+losses and are intentionally static (a fresh MoE-16B run is not comparable; see the
+builder's header). They ship checked-in and are left untouched.
 
 The reproduce scripts read **only** from this tree and end with a
 `VERIFICATION: N/N checks PASS` line that asserts each cell against the paper.
