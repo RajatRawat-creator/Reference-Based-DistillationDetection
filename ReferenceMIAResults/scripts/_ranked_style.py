@@ -32,6 +32,7 @@ COLOR = {
     "DeepSeek R1":            "#e31a1c",  # dark red
     "QwQ-32B Preview":        "#6a3d9a",  # dark purple
     "Qwen-3-235B":            "#b15928",  # brown (XCoder candidate only)
+    "Qwen-3-8B":              "#d62728",  # red (controlled 4-teacher pool only)
     "GPT-OSS-120B":           "#1f78b4",  # dark blue
     "Claude Opus 4.5":        "#33a02c",  # dark green
     "Claude Opus 4.6":        "#ff7f00",  # dark orange
@@ -49,7 +50,7 @@ ANSWERS_ONLY = {"Gemma-3-27B-it", "Llama-3.3-70B-Instruct", "Claude-3.5-Sonnet"}
 STARRED = {"Claude Opus 4.5", "Claude Opus 4.6", "o1", "o3"}
 SHORT = {
     "DeepSeek R1": "DeepSeek R1", "QwQ-32B Preview": "QwQ 32B Preview",
-    "Qwen-3-235B": "Qwen 3 235B",
+    "Qwen-3-235B": "Qwen 3 235B", "Qwen-3-8B": "Qwen 3 8B",
     "GPT-OSS-120B": "GPT-OSS 120B", "Claude Opus 4.5": "Claude Opus 4.5",
     "Claude Opus 4.6": "Claude Opus 4.6", "o1": "o1", "o3": "o3",
     "Gemma-3-27B-it": "Gemma 3 27B", "Llama-3.3-70B-Instruct": "Llama 3.3 70B Instruct",
