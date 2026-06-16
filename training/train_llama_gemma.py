@@ -72,7 +72,9 @@ DATASETS_DIR    = os.environ.get(
 )
 OUTPUT_BASE_DIR = os.environ.get(
     "SFT_OUTPUT_DIR_LLAMA_GEMMA",
-    os.path.join(_REPO_ROOT, "checkpoints", "llama_gemma"),
+    # Unified root: both train_*.py write here so reference_mia's single
+    # CHECKPOINTS_DIR (default ../checkpoints) resolves Student=X/... directly.
+    os.path.join(_REPO_ROOT, "checkpoints"),
 )
 
 LEARNING_RATE         = "1e-5"

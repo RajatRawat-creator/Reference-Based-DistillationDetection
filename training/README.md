@@ -13,8 +13,12 @@ the configured students on every dataset found.
 
 - `HF_TOKEN`: needed for gated models (Llama, Gemma).
 - `SFT_DATASETS_DIR` (optional): override the default `<repo>/data/training`.
-- `SFT_OUTPUT_DIR` / `SFT_OUTPUT_DIR_LLAMA_GEMMA` (optional): override
-  default checkpoint roots under `<repo>/checkpoints/...`.
+- `SFT_OUTPUT_DIR` / `SFT_OUTPUT_DIR_LLAMA_GEMMA` (optional): override the
+  output root. Both scripts default to the **same** unified root
+  `<repo>/checkpoints`, writing each run to `checkpoints/Student=X/Student=X_Teacher=...`.
+  This is exactly what `reference_mia/run_controlled.sh` expects via its single
+  `CHECKPOINTS_DIR` (default `../checkpoints`), so MIA scoring finds the targets
+  with no copying or symlinking.
 
 ## Hyperparameters
 
