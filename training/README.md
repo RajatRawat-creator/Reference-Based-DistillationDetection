@@ -12,7 +12,7 @@ the configured students on every dataset found.
 ## Required env
 
 - `HF_TOKEN`: needed for gated models (Llama, Gemma).
-- `SFT_DATASETS_DIR` (optional): override the default `<repo>/data/SFTDatasets`.
+- `SFT_DATASETS_DIR` (optional): override the default `<repo>/data/training`.
 - `SFT_OUTPUT_DIR` / `SFT_OUTPUT_DIR_LLAMA_GEMMA` (optional): override
   default checkpoint roots under `<repo>/checkpoints/...`.
 

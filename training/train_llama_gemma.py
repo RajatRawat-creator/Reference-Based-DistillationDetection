@@ -1,7 +1,7 @@
 """
 SFT training: Llama-3.2-3B-Instruct + Gemma-3-4B-PT students.
 
-Reads every *.jsonl file under SFTDatasets/ and runs SFT once per
+Reads every *.jsonl file under data/training/ and runs SFT once per
 (student, dataset) pair. Each student carries its own template:
 
     Llama-3.2-3B-Instruct : tokenizer.apply_chat_template (instruct-style)
@@ -68,7 +68,7 @@ _REPO_ROOT  = os.path.dirname(_SCRIPT_DIR)
 
 DATASETS_DIR    = os.environ.get(
     "SFT_DATASETS_DIR",
-    os.path.join(_REPO_ROOT, "data", "SFTDatasets"),
+    os.path.join(_REPO_ROOT, "data", "training"),
 )
 OUTPUT_BASE_DIR = os.environ.get(
     "SFT_OUTPUT_DIR_LLAMA_GEMMA",

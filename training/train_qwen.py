@@ -1,7 +1,7 @@
 """
 SFT training: Qwen-2.5-1.5B + Qwen-2.5-3B students.
 
-Reads every *.jsonl file under SFTDatasets/ and runs SFT once per
+Reads every *.jsonl file under data/training/ and runs SFT once per
 (student, dataset) pair, producing 2 x N trained model directories.
 
 Prompt template (plain text):
@@ -47,7 +47,7 @@ _REPO_ROOT  = os.path.dirname(_SCRIPT_DIR)
 
 DATASETS_DIR    = os.environ.get(
     "SFT_DATASETS_DIR",
-    os.path.join(_REPO_ROOT, "data", "SFTDatasets"),
+    os.path.join(_REPO_ROOT, "data", "training"),
 )
 OUTPUT_BASE_DIR = os.environ.get(
     "SFT_OUTPUT_DIR",
