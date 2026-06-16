@@ -25,8 +25,9 @@ if [[ -z "${HF_TOKEN:-}" ]]; then
 fi
 
 # Roots for controlled checkpoints and MIA scoring inputs.
-# CHECKPOINTS_DIR points at the REAL post-trained tree on /data; pairs targets
-# are paths RELATIVE to it (keep the Student=X/ or OMI_COT_Models/ prefix), so
+# CHECKPOINTS_DIR points at the post-trained tree (where train_*.py wrote the
+# students); pairs targets are paths RELATIVE to it, in the form
+# Student=X/Student=X_<dataset_id> that train_*.py produces, so
 # $CHECKPOINTS_DIR/$target resolves directly.
 CHECKPOINTS_DIR=${CHECKPOINTS_DIR:-"../checkpoints"}   # EDIT: where train_*.sh wrote the students
 DATASETS_DIR=${DATASETS_DIR:-"../data/MIADatasets"}

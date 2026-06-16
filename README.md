@@ -161,6 +161,7 @@ files are scored — data wiring, not algorithm). No changes to the MIA / scorin
 | `o1_detection/run_o1_ascii_unicode.py`             | `NewScripts/run_reference_attack_o1_controlled.py`                         |
 | `o1_detection/run_o1_ascii_unicode.sh`             | `NewScripts/run_reference_attack_o1_controlled.sh`                         |
 | `data/training/Teacher=*.jsonl`                    | `scripts/FINALGITHUBALLSCRIPTS/SFTDatasets{,OLDD}/Teacher=*.jsonl`         |
+| `data/training/o1__s1k__chat__openai_responses.jsonl` | `scripts/FINALGITHUBALLSCRIPTS/SFTDatasetsOLDD/o1__s1k__chat__openai_responses.jsonl` (o1 SFT corpus for the o1-distilled controlled students) |
 | `data/MIADatasets/*` (controlled candidates)       | cleaned 200-row teacher responses (Gemma/Llama/GPT-OSS/Qwen, OMI+s1)       |
 | `data/wild/*` (Gemma/Llama/GPT-OSS)                | identical to `data/MIADatasets/` (same 3 teachers)                        |
 | `data/wild/*` (Claude/R1/o1/o3/QwQ-Preview/Qwen-3-235B) | `scripts/collected_outputs/` + `NewScripts/R1testUnicode_upload/collected_outputs/` |
