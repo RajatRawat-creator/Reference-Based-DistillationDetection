@@ -1,5 +1,5 @@
 {
-  "model_name": "Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=S1_Template=Chat-TraceOnly",
+  "model_name": "Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=S1_Template=Chat",
   "ref_model": "Qwen/Qwen2.5-1.5B",
   "results": {
     "Ref-Norm Loss": {

@@ -717,9 +717,9 @@
       ],
       "source": "run_script"
     },
-    "9305e4bf19bc732a5751305757a9d40f76a756c8": {
+    "ff689b4dd09f97fd8723814e619fa285a0f74d8d": {
       "dest": "controlled/Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat.json",
-      "model_name": "Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat-TraceOnly",
+      "model_name": "Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat",
       "ref_model": "google/gemma-3-4b-pt",
       "candidate_keys": [
         "GPT-OSS-120B (OMI, Chat)",
@@ -733,9 +733,9 @@
       ],
       "source": "run_script"
     },
-    "c42dd68c1636033a169988803a25aaf7dfe88b18": {
+    "209c54ad341fa13d0112e73a28edbabd1d1a3066": {
       "dest": "controlled/Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=s1(1K)_Template=Chat.json",
-      "model_name": "Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=S1_Template=Chat-TraceOnly",
+      "model_name": "Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=S1_Template=Chat",
       "ref_model": "google/gemma-3-4b-pt",
       "candidate_keys": [
         "GPT-OSS-120B (OMI, Chat)",
@@ -845,9 +845,9 @@
       ],
       "source": "run_script"
     },
-    "4b85a13b7019d3132d8b61a3b6c30345dedcd8ed": {
+    "1185442c1788dcc29d778b4c0d598c2ed18f6288": {
       "dest": "controlled/Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat.json",
-      "model_name": "Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat-TraceOnly",
+      "model_name": "Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat",
       "ref_model": "Qwen/Qwen2.5-1.5B",
       "candidate_keys": [
         "GPT-OSS-120B (OMI, Chat)",
@@ -861,9 +861,9 @@
       ],
       "source": "run_script"
     },
-    "b58534f7be63100eaf87acc4dafb83b96a31f240": {
+    "e7c3a2ea3970f311d6e3da0f1b4032f0d8cd7739": {
       "dest": "controlled/Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=s1(1K)_Template=Chat.json",
-      "model_name": "Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=S1_Template=Chat-TraceOnly",
+      "model_name": "Student=Qwen-2.5-1.5B_Teacher=Qwen-3-8B_Data=S1_Template=Chat",
       "ref_model": "Qwen/Qwen2.5-1.5B",
       "candidate_keys": [
         "GPT-OSS-120B (OMI, Chat)",
@@ -941,9 +941,9 @@
       ],
       "source": "run_script"
     },
-    "a259e4420a1297e12ea36a9d1f43affd0f80a5f9": {
+    "4ac1a042022a4d31893a10ee0ff9e12a389e9e4e": {
       "dest": "controlled/Student=Qwen-2.5-3B_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat.json",
-      "model_name": "Student=Qwen-2.5-3B_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat-TraceOnly",
+      "model_name": "Student=Qwen-2.5-3B_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat",
       "ref_model": "Qwen/Qwen2.5-3B",
       "candidate_keys": [
         "GPT-OSS-120B (OMI, Chat)",
@@ -957,9 +957,9 @@
       ],
       "source": "run_script"
     },
-    "02c11ffd764459656b358db0db424981e463666c": {
+    "13cf6ecaf7ecf7dc3be950f61fdd743d60fa9788": {
       "dest": "controlled/Student=Qwen-2.5-3B_Teacher=Qwen-3-8B_Data=s1(1K)_Template=Chat.json",
-      "model_name": "Student=Qwen-2.5-3B_Teacher=Qwen-3-8B_Data=S1_Template=Chat-TraceOnly",
+      "model_name": "Student=Qwen-2.5-3B_Teacher=Qwen-3-8B_Data=S1_Template=Chat",
       "ref_model": "Qwen/Qwen2.5-3B",
       "candidate_keys": [
         "GPT-OSS-120B (OMI, Chat)",

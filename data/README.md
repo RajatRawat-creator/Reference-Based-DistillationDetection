@@ -30,8 +30,8 @@ Files in this release:
 - `Teacher=Nvidia-Llama-3.3-70B-Instruct_Data=S1_Template=Chat.jsonl`
 - `Teacher=GPT-OSS-120B_Data=OMI(1K)_Template=Chat.jsonl`
 - `Teacher=GPT-OSS-120B_Data=S1_Template=Chat.jsonl`
-- `Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat-TraceOnly.jsonl`
-- `Teacher=Qwen-3-8B_Data=S1_Template=Chat-TraceOnly.jsonl`
+- `Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat.jsonl`
+- `Teacher=Qwen-3-8B_Data=S1_Template=Chat.jsonl`
 
 ## `wild/` provenance
 

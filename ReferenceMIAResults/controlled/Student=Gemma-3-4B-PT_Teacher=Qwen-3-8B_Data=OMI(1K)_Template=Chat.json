@@ -1,5 +1,5 @@
 {
-  "model_name": "Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat-TraceOnly",
+  "model_name": "Student=Gemma-3-4B-PT_Teacher=Qwen-3-8B_Data=OMI(1K)_Template=Chat",
   "ref_model": "google/gemma-3-4b-pt",
   "results": {
     "Ref-Norm Loss": {
