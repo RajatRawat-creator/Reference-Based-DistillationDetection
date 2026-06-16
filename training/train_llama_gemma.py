@@ -46,13 +46,13 @@ else:
 # Llama runs first, then Gemma.
 # Gemma's lower block_size avoids 262K-vocab OOM on long seqs.
 STUDENT_CONFIGS = [
-    #{
-    #    "model_name": "meta-llama/Llama-3.2-3B-Instruct",
-    #    "prefix": "Student=Llama-3.2-3B-Instruct",
-    #    "use_chat_template": True,
-    #    "needs_token_type_ids": False,
-    #    "block_size": 4096,
-    #},
+    {
+        "model_name": "meta-llama/Llama-3.2-3B-Instruct",
+        "prefix": "Student=Llama-3.2-3B-Instruct",
+        "use_chat_template": True,
+        "needs_token_type_ids": False,
+        "block_size": 4096,
+    },
     {
         "model_name": "google/gemma-3-4b-pt",
         "prefix": "Student=Gemma-3-4B-PT",
