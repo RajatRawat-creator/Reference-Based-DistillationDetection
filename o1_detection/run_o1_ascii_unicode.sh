@@ -50,8 +50,8 @@ export TOKENIZERS_PARALLELISM=false
 export PYTORCH_ALLOC_CONF=expandable_segments:True
 export TRANSFORMERS_NUM_WORKERS_MATERIALIZE=1
 export HF_TOKEN="${HF_TOKEN:-hf_PASTE_YOUR_TOKEN_HERE}"
-if [[ -z "${HF_TOKEN:-}" ]]; then
-  echo "ERROR: HF_TOKEN env var is not set." >&2
+if [[ -z "${HF_TOKEN:-}" || "${HF_TOKEN}" == "hf_PASTE_YOUR_TOKEN_HERE" ]]; then
+  echo "ERROR: set your real HF_TOKEN (export it, or replace the placeholder above)." >&2
   exit 1
 fi
 

@@ -31,6 +31,10 @@ export HF_DATASETS_CACHE=$HF_HOME/datasets
 export HUGGINGFACE_HUB_CACHE=$HF_HUB_CACHE
 export TRANSFORMERS_CACHE=$HF_HUB_CACHE
 export HF_TOKEN="${HF_TOKEN:-hf_PASTE_YOUR_TOKEN_HERE}"
+if [[ -z "${HF_TOKEN:-}" || "${HF_TOKEN}" == "hf_PASTE_YOUR_TOKEN_HERE" ]]; then
+  echo "ERROR: set your real HF_TOKEN (export it, or replace the placeholder above)." >&2
+  exit 1
+fi
 mkdir -p "$HF_HUB_CACHE" "$HF_DATASETS_CACHE"
 
 # DeepSeek remote-code load: prefer the portable Triton/PyTorch FP8 fallback.

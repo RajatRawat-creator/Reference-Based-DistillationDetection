@@ -19,8 +19,8 @@ export HF_TOKEN="${HF_TOKEN:-hf_PASTE_YOUR_TOKEN_HERE}"
 export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"  # EDIT: HF cache dir
 export PYTHONNOUSERSITE=1
 
-if [[ -z "${HF_TOKEN:-}" ]]; then
-  echo "ERROR: HF_TOKEN env var is not set." >&2
+if [[ -z "${HF_TOKEN:-}" || "${HF_TOKEN}" == "hf_PASTE_YOUR_TOKEN_HERE" ]]; then
+  echo "ERROR: set your real HF_TOKEN (export it, or replace the placeholder above)." >&2
   exit 1
 fi
 

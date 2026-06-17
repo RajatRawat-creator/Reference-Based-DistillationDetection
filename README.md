@@ -177,7 +177,7 @@ run the corresponding stage first.
 
 | Result | Command(s) | Reads | Notes |
 |---|---|---|---|
-| **Controlled + real-world accuracy, top-1 significance** | `python ReferenceMIAResults/scripts/reproduce_tables.py` | `ReferenceMIAResults/` | CPU; 27/27 checks |
+| **Controlled + real-world accuracy, top-1 significance** | `python ReferenceMIAResults/scripts/reproduce_tables.py` | `ReferenceMIAResults/` | CPU; 28/28 checks |
 | **Margin threshold + LOSO / leave-one-teacher-out + significance** | `python ReferenceMIAResults/scripts/reproduce_threshold_generalization.py` | `ReferenceMIAResults/` | CPU; fold-fit τ (max-F1 ≈ 0.067); 38/38 checks |
 | **o1 ASCII-vs-Unicode table (controlled)** | `python ReferenceMIAResults/scripts/reproduce_o1_ascii_unicode.py` | `ReferenceMIAResults/` | CPU; 54/54 checks |
 | **Open-world o1 significance + same-family-excluded rankings** | `python ReferenceMIAResults/scripts/reproduce_open_questions.py` | `ReferenceMIAResults/` | CPU; 25/25 checks |

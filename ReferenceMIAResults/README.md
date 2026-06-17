@@ -141,7 +141,7 @@ controls significant; smallest distilled gap (+0.0573) exceeds the largest contr
 The only significance result in the open-questions section (the ranking figures
 there are qualitative, no p-values). δ_{Uni−ASCII} = mean(L_ASCII)−mean(L_Unicode)
 with bootstrap CI + normality-aware test (null 0) for DeepSeek-R1 (ref MoE-16B,
-+0.937, p=8.5e-16) and the three GPT-OSS configs. `VERIFICATION: 20/20 PASS`.
++0.937, p=8.5e-16) and the three GPT-OSS configs. `VERIFICATION: 25/25 PASS`.
 (The paper labels the GPT-OSS-120B/ref-GPT-OSS-20B row "t", but its diffs are
 non-normal and the reported p=3.5e-8 is the Wilcoxon value — governing test is
 Wilcoxon.)
